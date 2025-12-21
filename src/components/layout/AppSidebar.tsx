@@ -121,7 +121,7 @@ export function AppSidebar({ monkMode, setMonkMode, blueLightFilter, setBlueLigh
             return (
               <Tooltip key={item.path} delayDuration={0}>
                 <TooltipTrigger asChild>{NavContent}</TooltipTrigger>
-                <TooltipContent side="right" className="glass border-white/10">
+                <TooltipContent side="right" className="z-[100] bg-popover text-popover-foreground border-border">
                   <p className="font-medium">{item.label}</p>
                   <p className="text-xs text-muted-foreground">{item.description}</p>
                 </TooltipContent>
@@ -150,7 +150,7 @@ export function AppSidebar({ monkMode, setMonkMode, blueLightFilter, setBlueLigh
             </Button>
           </TooltipTrigger>
           {collapsed && (
-            <TooltipContent side="right" className="glass border-white/10">
+            <TooltipContent side="right" className="z-[100] bg-popover text-popover-foreground border-border">
               <p>Monk Mode (Grayscale)</p>
             </TooltipContent>
           )}
@@ -171,7 +171,7 @@ export function AppSidebar({ monkMode, setMonkMode, blueLightFilter, setBlueLigh
             </Button>
           </TooltipTrigger>
           {collapsed && (
-            <TooltipContent side="right" className="glass border-white/10">
+            <TooltipContent side="right" className="z-[100] bg-popover text-popover-foreground border-border">
               <p>Blue Light Filter</p>
             </TooltipContent>
           )}

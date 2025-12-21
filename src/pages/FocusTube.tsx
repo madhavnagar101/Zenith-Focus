@@ -8,6 +8,7 @@ import {
   BookOpen,
   Star,
   CheckCircle2,
+  X,
 } from "lucide-react";
 import { GlassCard } from "@/components/ui/GlassCard";
 import { Button } from "@/components/ui/button";
@@ -21,6 +22,7 @@ interface Video {
   progress: number;
   thumbnail: string;
   category: string;
+  youtubeId: string;
 }
 
 const videos: Video[] = [
@@ -32,6 +34,7 @@ const videos: Video[] = [
     progress: 75,
     thumbnail: "🌱",
     category: "Mindfulness",
+    youtubeId: "W7k75r0e0hE", // Visuals
   },
   {
     id: "2",
@@ -41,6 +44,7 @@ const videos: Video[] = [
     progress: 30,
     thumbnail: "🏰",
     category: "Growth",
+    youtubeId: "L_WDg9gP-xw", // Kurzgesagt
   },
   {
     id: "3",
@@ -50,6 +54,7 @@ const videos: Video[] = [
     progress: 0,
     thumbnail: "🦉",
     category: "Focus",
+    youtubeId: "mMS47DuyVd0", // Pomodoro
   },
   {
     id: "4",
@@ -59,6 +64,67 @@ const videos: Video[] = [
     progress: 100,
     thumbnail: "🧭",
     category: "Curiosity",
+    youtubeId: "VS_v2Sg6r_c", // Veritasium
+  },
+  {
+    id: "5",
+    title: "Digital Minimalism",
+    description: "Reclaiming your time in a distracted world",
+    duration: "14:10",
+    progress: 0,
+    thumbnail: "📱",
+    category: "Focus",
+    youtubeId: "3E7hkPZ-HTk", // Cal Newport
+  },
+  {
+    id: "6",
+    title: "The Art of Doing Nothing",
+    description: "Why downtime is essential for creativity",
+    duration: "09:30",
+    progress: 10,
+    thumbnail: "🌅",
+    category: "Mindfulness",
+    youtubeId: "1-SJGQ2HLp8",
+  },
+  {
+    id: "7",
+    title: "Deep Work Basics",
+    description: "Mastering the skill of intense focus",
+    duration: "22:15",
+    progress: 55,
+    thumbnail: "⚡",
+    category: "Growth",
+    youtubeId: "4TpyGvJpA6k",
+  },
+  {
+    id: "8",
+    title: "Philosophy of Boredom",
+    description: "How boredom can trigger your best ideas",
+    duration: "11:00",
+    progress: 0,
+    thumbnail: "🤔",
+    category: "Curiosity",
+    youtubeId: "LKPwKxD6WbU",
+  },
+  {
+    id: "9",
+    title: "Nature's Rhythm",
+    description: "Syncing your biological clock for better energy",
+    duration: "16:45",
+    progress: 0,
+    thumbnail: "🍃",
+    category: "Mindfulness",
+    youtubeId: "BHACKCNDMW8", // Nature
+  },
+  {
+    id: "10",
+    title: "Neuroplasticity 101",
+    description: "How to physically rewire your brain",
+    duration: "25:00",
+    progress: 0,
+    thumbnail: "🧠",
+    category: "Growth",
+    youtubeId: "ELpfYCZa87g",
   },
 ];
 
@@ -71,20 +137,15 @@ export default function FocusTube() {
   const [showQuestion, setShowQuestion] = useState(false);
   const [watchTime, setWatchTime] = useState(0);
 
-  const filteredVideos = selectedCategory === "All" 
-    ? videos 
+  const filteredVideos = selectedCategory === "All"
+    ? videos
     : videos.filter(v => v.category === selectedCategory);
 
   const handleVideoSelect = (video: Video) => {
     setCurrentVideo(video);
     setIsPlaying(true);
     setWatchTime(0);
-    
-    // Simulate 10-minute comprehension check
-    setTimeout(() => {
-      setIsPlaying(false);
-      setShowQuestion(true);
-    }, 10000); // 10 seconds for demo
+    setShowQuestion(false);
   };
 
   return (
@@ -143,49 +204,54 @@ export default function FocusTube() {
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.2 }}
           >
-            <GlassCard className="aspect-video flex items-center justify-center relative overflow-hidden">
+            <GlassCard className="aspect-video flex items-center justify-center relative overflow-hidden bg-black/40 p-0">
               {currentVideo ? (
-                <div className="w-full h-full flex flex-col items-center justify-center">
-                  <span className="text-8xl mb-4">{currentVideo.thumbnail}</span>
-                  <h3 className="text-xl font-display font-semibold text-foreground text-center px-4">
-                    {currentVideo.title}
-                  </h3>
-                  {isPlaying && (
-                    <motion.div
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      className="absolute bottom-4 left-4 right-4"
-                    >
-                      <div className="h-1 bg-white/20 rounded-full overflow-hidden">
-                        <motion.div
-                          className="h-full bg-primary"
-                          initial={{ width: "0%" }}
-                          animate={{ width: "100%" }}
-                          transition={{ duration: 10, ease: "linear" }}
-                        />
-                      </div>
-                    </motion.div>
+                <>
+                  {isPlaying ? (
+                    <iframe
+                      width="100%"
+                      height="100%"
+                      src={`https://www.youtube.com/embed/${currentVideo.youtubeId}?autoplay=1`}
+                      title={currentVideo.title}
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                      className="absolute inset-0 z-10"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex flex-col items-center justify-center">
+                      <span className="text-8xl mb-4">{currentVideo.thumbnail}</span>
+                      <h3 className="text-xl font-display font-semibold text-foreground text-center px-4">
+                        {currentVideo.title}
+                      </h3>
+                    </div>
                   )}
-                </div>
+
+                  {/* Play/Pause overlay - Only show when NOT playing */}
+                  {!isPlaying && (
+                    <button
+                      onClick={() => setIsPlaying(true)}
+                      className="absolute inset-0 flex items-center justify-center bg-background/50 hover:bg-background/40 transition-colors z-20"
+                    >
+                      <Play className="w-16 h-16 text-foreground ml-2" />
+                    </button>
+                  )}
+
+                  {/* Close Button when playing */}
+                  {isPlaying && (
+                    <button
+                      onClick={() => setIsPlaying(false)}
+                      className="absolute top-4 right-4 p-2 bg-black/60 hover:bg-black/80 text-white rounded-full z-30 transition-colors"
+                      title="Close Video"
+                    >
+                      <X className="w-5 h-5" />
+                    </button>
+                  )}
+                </>
               ) : (
-                <div className="text-center">
+                <div className="text-center p-6">
                   <BookOpen className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
                   <p className="text-muted-foreground">Select a video to begin learning</p>
                 </div>
-              )}
-              
-              {/* Play/Pause overlay */}
-              {currentVideo && (
-                <button
-                  onClick={() => setIsPlaying(!isPlaying)}
-                  className="absolute inset-0 flex items-center justify-center bg-background/50 opacity-0 hover:opacity-100 transition-opacity"
-                >
-                  {isPlaying ? (
-                    <Pause className="w-16 h-16 text-foreground" />
-                  ) : (
-                    <Play className="w-16 h-16 text-foreground ml-2" />
-                  )}
-                </button>
               )}
             </GlassCard>
           </motion.div>

@@ -12,6 +12,7 @@ import {
   Timer,
   Brain,
   Zap,
+  BellOff,
 } from "lucide-react";
 import { GlassCard } from "@/components/ui/GlassCard";
 import { Button } from "@/components/ui/button";
@@ -60,7 +61,67 @@ export default function DeepWork() {
   const [showQuiz, setShowQuiz] = useState(false);
   const [sessionXp, setSessionXp] = useState(0);
 
-  // Anti-cheat: Detect tab visibility
+  // New Integrated Features
+  const [monkMode, setMonkMode] = useState(false);
+  const [blockedNotifs, setBlockedNotifs] = useState(0);
+  const [showSevenSecRule, setShowSevenSecRule] = useState(false);
+  const [sevenSecCountdown, setSevenSecCountdown] = useState(7);
+
+  // Toggle everything with Monk Mode
+  const toggleMonkMode = (enabled: boolean) => {
+    setMonkMode(enabled);
+    setTunnelVision(enabled);
+    setBionicReading(enabled);
+    if (!enabled) setBlockedNotifs(0);
+  };
+
+  // Simulate incoming blocked notifications
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (isRunning && monkMode) {
+      interval = setInterval(() => {
+        if (Math.random() > 0.7) { // 30% chance every 5s
+          setBlockedNotifs(prev => prev + 1);
+        }
+      }, 5000);
+    }
+    return () => clearInterval(interval);
+  }, [isRunning, monkMode]);
+
+  // Seven Second Rule Countdown
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (showSevenSecRule && sevenSecCountdown > 0) {
+      interval = setInterval(() => {
+        setSevenSecCountdown(prev => prev - 1);
+      }, 1000);
+    } else if (sevenSecCountdown === 0) {
+      // Allow exit
+    }
+    return () => clearInterval(interval);
+  }, [showSevenSecRule, sevenSecCountdown]);
+
+  const handleStopAttempt = () => {
+    if (monkMode && isRunning) {
+      setShowSevenSecRule(true);
+      setSevenSecCountdown(7);
+      setIsRunning(false); // Pause timer during reflection
+    } else {
+      setIsRunning(!isRunning); // Standard toggle
+    }
+  };
+
+  const confirmStop = () => {
+    setShowSevenSecRule(false);
+    setIsRunning(false); // Ensure it stays stopped
+  };
+
+  const cancelStop = () => {
+    setShowSevenSecRule(false);
+    setIsRunning(true); // Resume
+  };
+
+  // ... (Anti-cheat existing logic)
   const handleVisibilityChange = useCallback(() => {
     if (document.hidden && isRunning) {
       setIsRunning(false);
@@ -79,13 +140,14 @@ export default function DeepWork() {
 
   // Session Completion Handler (Triggered when timer hits 0)
   const handleSessionComplete = async () => {
-    const earnedXp = sessionXp + 50; // Base completion bonus
+    const earnedXp = sessionXp + 50 + (monkMode ? 50 : 0); // Bonus for Monk Mode
     await logSession({
-      durationSeconds: 25 * 60, // Default duration for now
+      durationSeconds: 25 * 60, // Default duration
       xpEarned: earnedXp,
       status: 'completed'
     });
     setSessionXp(0);
+    setBlockedNotifs(0);
   };
 
   // Timer logic
@@ -94,7 +156,7 @@ export default function DeepWork() {
     if (isRunning && time > 0) {
       interval = setInterval(() => {
         setTime((prev) => {
-          // Every 15 mins (900s), trigger quiz
+          // Every 15 mins (900s), trigger quiz if not near end
           if (prev % 900 === 0 && prev !== 25 * 60) {
             setIsRunning(false);
             setShowQuiz(true);
@@ -120,6 +182,8 @@ export default function DeepWork() {
     setTime(25 * 60);
     setIsRunning(false);
     setSessionXp(0);
+    setBlockedNotifs(0);
+    setShowSevenSecRule(false);
   };
 
   const handleQuizAnswer = (answerIndex: number) => {
@@ -140,7 +204,54 @@ export default function DeepWork() {
 
   return (
     <div className={cn("p-4 lg:p-8 space-y-6 relative", tunnelVision && "tunnel-vision")}>
-      {/* Penalty Overlay */}
+      {/* 7-Second Rule Overlay */}
+      <AnimatePresence>
+        {showSevenSecRule && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 bg-background/95 flex items-center justify-center p-4"
+          >
+            <GlassCard className="p-8 max-w-md text-center border-destructive/30">
+              <div className="w-20 h-20 mx-auto rounded-full bg-destructive/20 flex items-center justify-center mb-6">
+                <motion.span
+                  className="text-5xl font-display font-bold text-destructive"
+                  animate={{ scale: [1, 1.2, 1] }}
+                  transition={{ repeat: Infinity, duration: 1 }}
+                >
+                  {sevenSecCountdown}
+                </motion.span>
+              </div>
+              <h2 className="text-2xl font-display font-bold text-foreground mb-2">
+                Pausing Monk Mode...
+              </h2>
+              <p className="text-muted-foreground mb-8">
+                Wait 7 seconds. Is this interruption worth breaking your flow state?
+              </p>
+
+              <div className="flex gap-4">
+                <Button
+                  variant="outline"
+                  className="flex-1 border-destructive text-destructive hover:bg-destructive/10"
+                  onClick={confirmStop}
+                  disabled={sevenSecCountdown > 0}
+                >
+                  I Must Quit
+                </Button>
+                <Button
+                  className="flex-1 bg-success hover:bg-success/90 text-success-foreground"
+                  onClick={cancelStop}
+                >
+                  Stay Focused
+                </Button>
+              </div>
+            </GlassCard>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Penalty Overlay (Existing) */}
       <AnimatePresence>
         {showPenalty && (
           <motion.div
@@ -170,7 +281,7 @@ export default function DeepWork() {
         )}
       </AnimatePresence>
 
-      {/* Quiz Modal */}
+      {/* Quiz Modal (Existing) */}
       <AnimatePresence>
         {showQuiz && (
           <motion.div
@@ -259,7 +370,7 @@ export default function DeepWork() {
           <div className="flex items-center justify-center gap-4">
             <Button
               size="lg"
-              onClick={() => setIsRunning(!isRunning)}
+              onClick={handleStopAttempt}
               className={cn(
                 "w-16 h-16 rounded-full",
                 isRunning
@@ -305,51 +416,69 @@ export default function DeepWork() {
           transition={{ delay: 0.2 }}
         >
           <GlassCard className="p-6 space-y-6">
-            <h3 className="font-display font-semibold text-lg text-foreground">
-              Focus Enhancements
-            </h3>
-
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center">
-                  {tunnelVision ? <EyeOff className="w-5 h-5 text-primary" /> : <Eye className="w-5 h-5 text-primary" />}
-                </div>
-                <div>
-                  <p className="font-medium text-foreground">Tunnel Vision</p>
-                  <p className="text-sm text-muted-foreground">Dim everything except focus area</p>
-                </div>
-              </div>
-              <Switch
-                checked={tunnelVision}
-                onCheckedChange={setTunnelVision}
-              />
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="font-display font-semibold text-lg text-foreground flex items-center gap-2">
+                <Brain className="w-5 h-5 text-primary" />
+                Focus Mode
+              </h3>
+              {monkMode && (
+                <span className="text-xs px-2 py-1 bg-primary/20 text-primary rounded-full font-medium animate-pulse">
+                  MONK MODE ACTIVE
+                </span>
+              )}
             </div>
 
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-accent/20 flex items-center justify-center">
-                  <Type className="w-5 h-5 text-accent" />
+            {/* Master Monk Mode Switch */}
+            <div className="p-4 glass-strong rounded-xl border border-primary/20 bg-primary/5">
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center shadow-lg shadow-primary/25">
+                    <Zap className="w-6 h-6 text-primary-foreground" />
+                  </div>
+                  <div>
+                    <p className="font-bold text-foreground">Monk Mode</p>
+                    <p className="text-xs text-muted-foreground">Tunnel Vision + Bionic + Shield</p>
+                  </div>
                 </div>
-                <div>
-                  <p className="font-medium text-foreground">Bionic Reading</p>
-                  <p className="text-sm text-muted-foreground">Bold key letters for faster scanning</p>
-                </div>
+                <Switch
+                  checked={monkMode}
+                  onCheckedChange={toggleMonkMode}
+                  disabled={isRunning}
+                />
               </div>
-              <Switch
-                checked={bionicReading}
-                onCheckedChange={setBionicReading}
-              />
             </div>
 
-            <div className="p-4 glass-strong rounded-xl">
-              <div className="flex items-center gap-2 mb-2">
-                <Timer className="w-4 h-4 text-primary" />
-                <span className="text-sm font-medium">Forced Active Recall</span>
+            {/* Feature Status Indicators */}
+            <div className="space-y-3">
+              <div className="flex items-center justify-between p-3 rounded-lg hover:bg-white/5 transition-colors">
+                <div className="flex items-center gap-3">
+                  <EyeOff className={cn("w-4 h-4", tunnelVision ? "text-primary" : "text-muted-foreground")} />
+                  <span className={cn("text-sm", tunnelVision ? "text-foreground font-medium" : "text-muted-foreground")}>Tunnel Vision</span>
+                </div>
+                <span className="text-xs text-muted-foreground">{tunnelVision ? "On" : "Off"}</span>
               </div>
-              <p className="text-xs text-muted-foreground">
-                Every 15 minutes, a quiz will pause playback to test comprehension.
-                Correct answers earn bonus XP.
-              </p>
+
+              <div className="flex items-center justify-between p-3 rounded-lg hover:bg-white/5 transition-colors">
+                <div className="flex items-center gap-3">
+                  <Type className={cn("w-4 h-4", bionicReading ? "text-primary" : "text-muted-foreground")} />
+                  <span className={cn("text-sm", bionicReading ? "text-foreground font-medium" : "text-muted-foreground")}>Bionic Reading</span>
+                </div>
+                <span className="text-xs text-muted-foreground">{bionicReading ? "On" : "Off"}</span>
+              </div>
+
+              <div className="flex items-center justify-between p-3 rounded-lg hover:bg-white/5 transition-colors">
+                <div className="flex items-center gap-3">
+                  <BellOff className={cn("w-4 h-4", monkMode ? "text-primary" : "text-muted-foreground")} />
+                  <span className={cn("text-sm", monkMode ? "text-foreground font-medium" : "text-muted-foreground")}>Notification Shield</span>
+                </div>
+                {monkMode ? (
+                  <span className="text-xs px-2 py-0.5 bg-destructive/20 text-destructive rounded-full">
+                    {blockedNotifs} Blocked
+                  </span>
+                ) : (
+                  <span className="text-xs text-muted-foreground">Off</span>
+                )}
+              </div>
             </div>
           </GlassCard>
         </motion.div>
@@ -360,7 +489,14 @@ export default function DeepWork() {
           animate={{ opacity: 1, x: 0 }}
           transition={{ delay: 0.3 }}
         >
-          <GlassCard className="p-6 h-full">
+          <GlassCard className="p-6 h-full relative overflow-hidden">
+            {monkMode && (
+              <div className="absolute top-4 right-4 z-10">
+                <span className="text-xs font-mono text-muted-foreground opacity-50">
+                  RELIEVING PREFRONTAL CORTEX...
+                </span>
+              </div>
+            )}
             <h3 className="font-display font-semibold text-lg text-foreground mb-4">
               Sample Learning Material
             </h3>

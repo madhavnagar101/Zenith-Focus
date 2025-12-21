@@ -31,6 +31,12 @@ const participants: Participant[] = [
   { id: "4", name: "Taylor", avatar: "🧔", status: "active", streak: 12, xp: 2100 },
   { id: "5", name: "Casey", avatar: "👱", status: "left", streak: 0, xp: 320 },
   { id: "6", name: "Morgan", avatar: "👨", status: "active", streak: 4, xp: 890 },
+  { id: "7", name: "Riley", avatar: "🧑‍🦱", status: "active", streak: 8, xp: 1400 },
+  { id: "8", name: "Quinn", avatar: "👩‍🦰", status: "active", streak: 20, xp: 3000 },
+  { id: "9", name: "Avery", avatar: "👱‍♀️", status: "away", streak: 1, xp: 200 },
+  { id: "10", name: "Parker", avatar: "👨‍🦱", status: "active", streak: 6, xp: 1100 },
+  { id: "11", name: "Dakota", avatar: "👩‍🦳", status: "active", streak: 9, xp: 1600 },
+  { id: "12", name: "Reese", avatar: "👨‍🦲", status: "active", streak: 15, xp: 2500 },
 ];
 
 interface LootItem {
@@ -125,7 +131,7 @@ export default function JOMOArena() {
               <p className="text-muted-foreground mb-6">
                 The urge to distract yourself will pass. Wait it out.
               </p>
-              
+
               <div className="text-6xl font-display font-bold text-destructive mb-8">
                 {countdown}
               </div>
@@ -147,7 +153,7 @@ export default function JOMOArena() {
                   Stay Strong
                 </Button>
               </div>
-              
+
               {countdown > 0 && (
                 <p className="text-sm text-muted-foreground mt-4">
                   Wait for the countdown to make your choice...
@@ -334,7 +340,7 @@ export default function JOMOArena() {
               </div>
             </div>
             <p className="text-muted-foreground mb-6">
-              Feeling the urge to check your phone or social media? Press the button and wait 7 seconds. 
+              Feeling the urge to check your phone or social media? Press the button and wait 7 seconds.
               Most cravings pass within this window.
             </p>
             <Button

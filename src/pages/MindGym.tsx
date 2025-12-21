@@ -48,6 +48,30 @@ const theoryCards: TheoryCard[] = [
     details: "Studies show we're less likely to remember information we know we can look up. This 'Google Effect' means we're outsourcing our memory to devices. While convenient, it weakens the neural pathways needed for deep thinking and creative connections.",
     color: "primary",
   },
+  {
+    id: "dopamine-detox",
+    title: "Dopamine Basics",
+    icon: "🧪",
+    summary: "Resetting your reward system",
+    details: "Constant high-dopamine stimuli (social media, games) can desensitize your brain's reward receptors. A 'detox' involves removing these stimuli for a period to reset sensitivity, making low-dopamine tasks (like reading or working) feel rewarding again.",
+    color: "destructive",
+  },
+  {
+    id: "pomodoro",
+    title: "Pomodoro Power",
+    icon: "🍅",
+    summary: "The 25/5 rhythm method",
+    details: "Your brain naturally cycles through energy states. The Pomodoro technique (25 min focus, 5 min rest) aligns with ultradian rhythms. The breaks are crucial—they allow your brain to consolidate information and prevent burnout.",
+    color: "accent",
+  },
+  {
+    id: "flow-state",
+    title: "Finding Flow",
+    icon: "🌊",
+    summary: "The psychology of optimal experience",
+    details: "Flow is a state of total immersion where self-consciousness fades and time distorts. To trigger it, you need a task that is slightly challenging but matches your skill level, along with clear goals and immediate feedback.",
+    color: "primary",
+  },
 ];
 
 // Schulte Table Game
@@ -108,7 +132,7 @@ function SchulteTable() {
       <p className="text-sm text-muted-foreground mb-4">
         Find numbers 1-25 in order as fast as possible. Improves peripheral vision and focus.
       </p>
-      
+
       {!gameStarted ? (
         <Button onClick={startGame} className="w-full bg-primary hover:bg-primary/90">
           <Play className="w-4 h-4 mr-2" />
@@ -196,7 +220,7 @@ function BoxBreathing() {
       <p className="text-sm text-muted-foreground mb-6">
         4-4-4-4 technique used by Navy SEALs to reduce stress and improve focus.
       </p>
-      
+
       <div className="flex flex-col items-center">
         <div className="relative w-40 h-40 mb-6">
           <motion.div
@@ -224,7 +248,7 @@ function BoxBreathing() {
             )}
           </div>
         </div>
-        
+
         <Button
           onClick={() => setIsActive(!isActive)}
           variant={isActive ? "destructive" : "default"}

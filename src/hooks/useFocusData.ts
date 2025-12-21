@@ -39,19 +39,41 @@ export function useFocusData() {
         queryFn: async () => {
             const stored = localStorage.getItem(KEYS.PROFILE);
             if (stored) return JSON.parse(stored) as Profile;
-            // Default
+            // Default / Seed Data for Demo
+            const seedProfile = { total_xp: 1250, current_streak: 12 };
+            // Optional: Save seed to storage so it persists specifically (or just return it)
+            if (!stored) {
+                localStorage.setItem(KEYS.PROFILE, JSON.stringify(seedProfile));
+                return seedProfile;
+            }
             return { total_xp: 0, current_streak: 0 };
         },
     });
 
-    // 2. Fetch Daily Stats (Today)
+    // 2. Fetch Daily Stats
     const { data: dailyStats } = useQuery({
         queryKey: ["dailyStats"],
         queryFn: async () => {
             const today = new Date().toISOString().split("T")[0];
             const allStatsStr = localStorage.getItem(KEYS.STATS);
             const allStats = allStatsStr ? JSON.parse(allStatsStr) : {};
-            return allStats[today] || { date: today, passive_minutes: 0, active_minutes: 0 };
+
+            if (allStats[today]) {
+                return allStats[today];
+            }
+
+            // Seed "Today's" stats for Demo so it doesn't look empty
+            const seedToday = {
+                date: today,
+                passive_minutes: 145, // ~2.5 hours of scrolling already done
+                active_minutes: 0     // Let them earn active minutes!
+            };
+
+            // Persist the seed
+            allStats[today] = seedToday;
+            localStorage.setItem(KEYS.STATS, JSON.stringify(allStats));
+
+            return seedToday;
         },
     });
 
