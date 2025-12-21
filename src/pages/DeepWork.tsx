@@ -17,6 +17,7 @@ import { GlassCard } from "@/components/ui/GlassCard";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
+import { useFocusData } from "@/hooks/useFocusData";
 
 // Convert text to bionic reading format
 function toBionicText(text: string): JSX.Element {
@@ -49,6 +50,7 @@ const quizQuestions = [
 ];
 
 export default function DeepWork() {
+  const { profile, logSession } = useFocusData();
   const [isRunning, setIsRunning] = useState(false);
   const [time, setTime] = useState(25 * 60); // 25 minutes
   const [tunnelVision, setTunnelVision] = useState(false);
@@ -56,8 +58,7 @@ export default function DeepWork() {
   const [isVisible, setIsVisible] = useState(true);
   const [showPenalty, setShowPenalty] = useState(false);
   const [showQuiz, setShowQuiz] = useState(false);
-  const [xp, setXp] = useState(150);
-  const [streak, setStreak] = useState(3);
+  const [sessionXp, setSessionXp] = useState(0);
 
   // Anti-cheat: Detect tab visibility
   const handleVisibilityChange = useCallback(() => {
@@ -65,7 +66,7 @@ export default function DeepWork() {
       setIsRunning(false);
       setIsVisible(false);
       setShowPenalty(true);
-      setXp((prev) => Math.max(0, prev - 25));
+      setSessionXp((prev) => Math.max(0, prev - 25));
     } else {
       setIsVisible(true);
     }
@@ -75,6 +76,17 @@ export default function DeepWork() {
     document.addEventListener("visibilitychange", handleVisibilityChange);
     return () => document.removeEventListener("visibilitychange", handleVisibilityChange);
   }, [handleVisibilityChange]);
+
+  // Session Completion Handler (Triggered when timer hits 0)
+  const handleSessionComplete = async () => {
+    const earnedXp = sessionXp + 50; // Base completion bonus
+    await logSession({
+      durationSeconds: 25 * 60, // Default duration for now
+      xpEarned: earnedXp,
+      status: 'completed'
+    });
+    setSessionXp(0);
+  };
 
   // Timer logic
   useEffect(() => {
@@ -86,6 +98,10 @@ export default function DeepWork() {
           if (prev % 900 === 0 && prev !== 25 * 60) {
             setIsRunning(false);
             setShowQuiz(true);
+          }
+          if (prev <= 1) {
+            handleSessionComplete();
+            return 0;
           }
           return prev - 1;
         });
@@ -103,11 +119,12 @@ export default function DeepWork() {
   const resetTimer = () => {
     setTime(25 * 60);
     setIsRunning(false);
+    setSessionXp(0);
   };
 
   const handleQuizAnswer = (answerIndex: number) => {
     if (answerIndex === quizQuestions[0].correct) {
-      setXp((prev) => prev + 50);
+      setSessionXp((prev) => prev + 50);
     }
     setShowQuiz(false);
     setIsRunning(true);
@@ -209,11 +226,11 @@ export default function DeepWork() {
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2 px-4 py-2 glass rounded-full">
             <Zap className="w-4 h-4 text-accent" />
-            <span className="font-semibold">{xp} XP</span>
+            <span className="font-semibold">{(profile?.total_xp || 0) + sessionXp} XP</span>
           </div>
           <div className="flex items-center gap-2 px-4 py-2 glass rounded-full">
             <span className="text-sm">🔥</span>
-            <span className="font-semibold">{streak} day streak</span>
+            <span className="font-semibold">{profile?.current_streak || 0} day streak</span>
           </div>
         </div>
       </motion.div>
@@ -330,7 +347,7 @@ export default function DeepWork() {
                 <span className="text-sm font-medium">Forced Active Recall</span>
               </div>
               <p className="text-xs text-muted-foreground">
-                Every 15 minutes, a quiz will pause playback to test comprehension. 
+                Every 15 minutes, a quiz will pause playback to test comprehension.
                 Correct answers earn bonus XP.
               </p>
             </div>

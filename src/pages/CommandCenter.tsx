@@ -14,6 +14,8 @@ import {
 import { GlassCard } from "@/components/ui/GlassCard";
 import { StatCard } from "@/components/ui/StatCard";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, PieChart, Pie, Cell } from "recharts";
+import { useFocusData } from "@/hooks/useFocusData";
+import { useAuth } from "@/contexts/AuthContext";
 
 // Mock data showing concerning screen time patterns
 const weeklyScreenTime = [
@@ -42,6 +44,9 @@ const knowledgeRetention = [
 const COLORS = ["#22c55e", "#ef4444"];
 
 export default function CommandCenter() {
+  const { dailyStats, profile, weeklyStats } = useFocusData();
+  const { user } = useAuth();
+
   return (
     <div className="p-4 lg:p-8 space-y-6">
       {/* Header */}
@@ -55,13 +60,13 @@ export default function CommandCenter() {
             Command Center
           </h1>
           <p className="text-muted-foreground mt-1">
-            Your digital wellbeing at a glance
+            {user ? "Welcome back" : "Your digital wellbeing at a glance"}
           </p>
         </div>
         <div className="flex items-center gap-2 px-4 py-2 glass rounded-full">
           <div className="w-2 h-2 rounded-full bg-destructive animate-pulse" />
           <span className="text-sm text-muted-foreground">
-            High distraction risk detected
+            Risk: High
           </span>
         </div>
       </motion.div>
@@ -78,13 +83,13 @@ export default function CommandCenter() {
               <AlertTriangle className="w-6 h-6 text-destructive" />
             </div>
             <div className="flex-1">
-              <h3 className="font-semibold text-foreground">TikTok Brain Alert</h3>
+              <h3 className="font-semibold text-foreground">Digital Health Alert</h3>
               <p className="text-sm text-muted-foreground">
-                Your passive browsing is 6x higher than deep work. Attention span declining.
+                Your passive browsing is high. Try a Deep Work session?
               </p>
             </div>
             <button className="px-4 py-2 bg-destructive text-destructive-foreground rounded-lg font-medium text-sm hover:bg-destructive/90 transition-colors">
-              Take Action
+              Boost Focus
             </button>
           </div>
         </GlassCard>
@@ -94,35 +99,35 @@ export default function CommandCenter() {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard
           title="Daily Screen Time"
-          value="8.7h"
+          value={`${(dailyStats?.passive_minutes / 60).toFixed(1)}h`}
           subtitle="Passive browsing"
           icon={Clock}
-          trend={{ value: 23, positive: false }}
+          trend={{ value: 0, positive: false }}
           variant="danger"
         />
         <StatCard
           title="Deep Work Today"
-          value="47m"
+          value={`${Math.round(dailyStats?.active_minutes || 0)}m`}
           subtitle="Focus sessions"
           icon={Brain}
-          trend={{ value: 12, positive: true }}
+          trend={{ value: 0, positive: true }}
           variant="success"
         />
         <StatCard
-          title="App Switches"
-          value="127"
-          subtitle="Context switches"
-          icon={TrendingDown}
-          trend={{ value: 8, positive: false }}
+          title="Current Streak"
+          value={`${profile?.current_streak || 0}`}
+          subtitle="Daily sessions"
+          icon={TrendingUp}
+          trend={{ value: 0, positive: true }}
           variant="warning"
         />
         <StatCard
-          title="Knowledge Retained"
-          value="15%"
-          subtitle="vs 85% googled"
+          title="Total XP"
+          value={`${profile?.total_xp || 0}`}
+          subtitle="Level 1"
           icon={TrendingUp}
-          trend={{ value: 5, positive: false }}
-          variant="danger"
+          trend={{ value: 0, positive: false }}
+          variant="success"
         />
       </div>
 
@@ -140,7 +145,7 @@ export default function CommandCenter() {
             </h3>
             <div className="h-64">
               <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={weeklyScreenTime}>
+                <AreaChart data={weeklyStats || []}>
                   <defs>
                     <linearGradient id="passiveGradient" x1="0" y1="0" x2="0" y2="1">
                       <stop offset="5%" stopColor="#ef4444" stopOpacity={0.3} />
@@ -160,6 +165,9 @@ export default function CommandCenter() {
                       border: "1px solid rgba(255,255,255,0.1)",
                       borderRadius: "12px",
                     }}
+                    itemStyle={{ color: "#fff" }}
+                    labelStyle={{ color: "#a1a1aa" }}
+                    cursor={{ stroke: "rgba(255,255,255,0.2)", strokeDasharray: "4 4" }}
                   />
                   <Area
                     type="monotone"
@@ -213,6 +221,9 @@ export default function CommandCenter() {
                       border: "1px solid rgba(255,255,255,0.1)",
                       borderRadius: "12px",
                     }}
+                    itemStyle={{ color: "#fff" }}
+                    labelStyle={{ color: "#a1a1aa" }}
+                    cursor={{ fill: "rgba(255,255,255,0.05)" }}
                   />
                   <Bar dataKey="hours" radius={[0, 8, 8, 0]}>
                     {appUsage.map((entry, index) => (
