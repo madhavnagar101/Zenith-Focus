@@ -13,7 +13,6 @@ import {
   Eye,
   ChevronLeft,
   ChevronRight,
-  Zap,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -57,8 +56,8 @@ export function AppSidebar({ monkMode, setMonkMode, blueLightFilter, setBlueLigh
                 exit={{ opacity: 0, x: -20 }}
                 className="flex items-center gap-3"
               >
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center glow-primary">
-                  <Zap className="w-5 h-5 text-primary-foreground" />
+                <div className="w-10 h-10 rounded-xl overflow-hidden shadow-lg shadow-primary/25">
+                  <img src="/logo.png" alt="Zenith Focus" className="w-full h-full object-cover" />
                 </div>
                 <div>
                   <h1 className="font-display font-bold text-lg text-foreground">Zenith Focus</h1>
@@ -68,8 +67,8 @@ export function AppSidebar({ monkMode, setMonkMode, blueLightFilter, setBlueLigh
             )}
           </AnimatePresence>
           {collapsed && (
-            <div className="w-10 h-10 mx-auto rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center glow-primary">
-              <Zap className="w-5 h-5 text-primary-foreground" />
+            <div className="w-10 h-10 mx-auto rounded-xl overflow-hidden shadow-lg shadow-primary/25">
+              <img src="/logo.png" alt="Zenith Focus" className="w-full h-full object-cover" />
             </div>
           )}
         </div>
